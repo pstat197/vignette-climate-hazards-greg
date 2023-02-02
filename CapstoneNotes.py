@@ -17,7 +17,7 @@ count_bord = cartopy.feature.NaturalEarthFeature('cultural','admin_0_boundary_li
 
 #%% read in climatology
 # get data from https://data.chc.ucsb.edu/products/CHPclim/netcdf/
-data_dir = '/home/chc-data-out/products/CHPclim/netcdf/'
+data_dir = 'D:/WorkSpace/Courses/2023Winter/TA/projects/ClimateHazards_Greg/'
 infile = 'chpclim.5050.monthly.nc'
 
 clim = xr.open_dataset(data_dir+infile)
@@ -59,5 +59,6 @@ ax.add_feature(cartopy.feature.OCEAN,color='white',zorder=100) #color the oceans
 cb = plt.colorbar(monmap,cax=fig.add_axes([0.1,0.09,0.8,0.03]), orientation='horizontal',\
                   ticks=[0,1,2,3,4,5,6,7,8,9,10,11],) #add colorbar
 cb.ax.set_xticklabels(['J','F','M','A','M','J','J','A','S','O','N','D'])
+plt.show()
 
 
