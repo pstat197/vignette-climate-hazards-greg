@@ -61,4 +61,6 @@ cb = plt.colorbar(monmap,cax=fig.add_axes([0.1,0.09,0.8,0.03]), orientation='hor
 cb.ax.set_xticklabels(['J','F','M','A','M','J','J','A','S','O','N','D'])
 plt.show()
 
+plt.show()
+
 
