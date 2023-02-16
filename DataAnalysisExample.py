@@ -21,9 +21,23 @@ totalPrecip = sum(clim.precip[i,:,:] for i in range(12))
 totalPrecip.plot.hist()
 plt.show()
 
+# Get the max 12-month precip.
+print("Max 12 month Precipitation:", totalPrecip.max())
+# Get areas over 75% of the max precip.
+maxTotalPrecip = totalPrecip.where(totalPrecip >= 0.5*totalPrecip.max())
+
+# Plot the histogram
+maxTotalPrecip.plot.pcolormesh()
+plt.show()
+
 #filter the area with annual precip over 100
 filtered = totalPrecip.where(totalPrecip > 100)
 
 #Visualize the area with precip over 1000
 filtered.plot.pcolormesh()
+plt.show()
+
+# Calculate the Jan, Feb, March sum.
+JFMPrecip = clim.precip[0,:,:] + clim.precip[1,:,:] + clim.precip[2,:,:]
+JFMPrecip.plot.pcolormesh()
 plt.show()
