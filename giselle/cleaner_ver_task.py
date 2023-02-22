@@ -154,6 +154,9 @@ minlon = -20; maxlon = 50.
 plot_son = SON_mean.mean(dim=["longitude", "latitude"]).to_pandas()
 plot_son.plot()
 t4= mk.seasonal_test(plot_son, period = 42)
+#%%
+from statsmodels.graphics.tsaplots import plot_acf
+#plot_acf(#time_series_values, lags = 15) 
 
 # %% 25 only
 #AvgPrec = chirps.precip.mean("time")
