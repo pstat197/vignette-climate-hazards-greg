@@ -64,7 +64,7 @@ ts_congo.isnull().sum()
 ts_congo = ts_congo.set_index('time')
 #%%
 ts_month_avg = ts_congo['precip'].resample('MS').mean()
-ts_month_avg.plot(figsize=(15,6))
+ts_month_avg.plot(figsize=(40,6))
 #%%
 from pylab import rcParams
 rcParams['figure.figsize'] = 18, 8
@@ -87,7 +87,7 @@ print(adf_test(ts_month_avg))
 #%%
 ts_s_adj = ts_month_avg - ts_month_avg.shift(12)
 ts_s_adj = ts_s_adj.dropna()
-ts_s_adj.plot()
+ts_s_adj.plot(figsize=(40,6))
 #%%
 from statsmodels.graphics.tsaplots import plot_acf, plot_pacf
 plot_acf(ts_s_adj)
@@ -119,20 +119,20 @@ for param in pdq:
         except:
             continue
 #%%
+for param in pdq:
+    for param_seasonal in seasonal_pdq:
+        try:
+            mod = sm.tsa.statespace.SARIMAX(ts_s_adj,
+                                            order=param,
+                                            seasonal_order=param_seasonal,
+                                            )
+            results = mod.fit(method = 'powell')
+            print('ARIMA{}x{}12 - AIC:{}'.format(param, param_seasonal, results.aic))
+        except:
+            continue
 #don't run below
 #%%
-ts_delhi = series_delhi[['Date','AQI']]
-#converting 'Date' column to type 'datetime' so that indexing can happen later
-ts_delhi['Date'] = pd.to_datetime(ts_delhi['Date'])
-ts_delhi.isnull().sum()
-ts_delhi = ts_delhi.dropna()
-ts_delhi.isnull().sum()
-
-ts_delhi = ts_delhi.set_index('Date')
-
-ts_month_avg = ts_delhi['AQI'].resample('MS').mean()
-ts_month_avg.plot(figsize = (15, 6))
-plt.show()
+#don't run below
 # %%
 # select DJF
 DA_DJF = drop_2mon.sel(time=drop_2mon.time.dt.season=="DJF")
