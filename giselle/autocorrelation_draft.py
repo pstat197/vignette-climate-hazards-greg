@@ -85,15 +85,37 @@ def adf_test(timeseries):
 
 print(adf_test(ts_month_avg))
 #%%
-ts_s_adj = ts_month_avg - ts_month_avg.shift(12)
+#define function for kpss test
+from statsmodels.tsa.stattools import kpss
+#define KPSS
+def kpss_test(timeseries):
+    print ('Results of KPSS Test:')
+    kpsstest = kpss(timeseries, regression='c')
+    kpss_output = pd.Series(kpsstest[0:3], index=['Test Statistic','p-value','Lags Used'])
+    for key,value in kpsstest[3].items():
+      kpss_output['Critical Value (%s)'%key] = value
+    print (kpss_output)
+print(kpss_test(ts_month_avg)) #kpss p-value too high (0.1 or above. need to shift)
+#%%
+ts_t_adj = ts_month_avg - ts_month_avg.shift(1)
+ts_t_adj = ts_t_adj.dropna()
+ts_t_adj.plot(figsize=(40,6))
+#%%
+print(adf_test(ts_t_adj))
+print(kpss_test(ts_t_adj)) #now less than 0.00000
+
+#%%
+ts_s_adj = ts_t_adj - ts_t_adj.shift(12)
 ts_s_adj = ts_s_adj.dropna()
 ts_s_adj.plot(figsize=(40,6))
 #%%
 from statsmodels.graphics.tsaplots import plot_acf, plot_pacf
-plot_acf(ts_s_adj)
+plot_acf(ts_s_adj, lags=360)
 matplotlib.pyplot.show()
-plot_pacf(ts_s_adj)
+plot_pacf(ts_s_adj, lags=244, method = 'ywm')
 matplotlib.pyplot.show()
+#.set_ticklabels([0, 2, 4 ,8 ,16 ,32, 64, 128, 256])
+#ax.xaxis.set_ticks
 #%%
 p = range(0, 3)
 d = range(1,2)
@@ -130,10 +152,37 @@ for param in pdq:
             print('ARIMA{}x{}12 - AIC:{}'.format(param, param_seasonal, results.aic))
         except:
             continue
-#don't run below
 #%%
-#don't run below
+#ARIMA(0, 1, 1)x(2, 1, 0, 12)
+mod = sm.tsa.statespace.SARIMAX(ts_s_adj,
+                                order=(0, 1, 2),
+                                seasonal_order=(0, 1, 2, 12))
+results = mod.fit(method = 'powell')
+print(results.summary().tables[1])
 # %%
+results.plot_diagnostics(figsize=(18, 8))
+plt.show()
+#%%
+pred = results.get_prediction(start=pd.to_datetime('2019-01-01'), dynamic=False)
+pred_ci = pred.conf_int()
+ax = ts_s_adj.plot(label='observed')
+pred.predicted_mean.plot(ax=ax, label='One-step ahead Forecast', alpha=.7, figsize=(60, 4))
+ax.fill_between(pred_ci.index,
+                pred_ci.iloc[:, 0],
+                pred_ci.iloc[:, 1], color='k', alpha=.2)
+ax.set_xlabel('Date')
+ax.set_ylabel('AQI')
+plt.legend()
+plt.show()
+#%%%
+y_forecasted = pred.predicted_mean
+y_truth = ts_s_adj['2019-01-01':]
+mse = ((y_forecasted - y_truth) ** 2).mean()
+print('The Mean Squared Error is {}'.format(round(mse, 2)))
+print('The Root Mean Squared Error is {}'.format(round(np.sqrt(mse), 2)))
+#MSE = 117.52
+#root MSE = 10.84
+#%%
 # select DJF
 DA_DJF = drop_2mon.sel(time=drop_2mon.time.dt.season=="DJF")
 
