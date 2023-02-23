@@ -16,12 +16,13 @@ import xarray as xr
 import cartopy.crs as ccrs
 import cartopy.feature
 import matplotlib.pyplot as plt
-import pymannkendall as mk
+#import pymannkendall as mk
 count_bord = cartopy.feature.NaturalEarthFeature('cultural','admin_0_boundary_lines_land','110m',facecolor='none')
-data_dir = '/Users/foamy/Downloads/CHC/'
+data_dir = '/Users/disha/downloads/'
 infile = 'chirps-v2.0.monthly.nc'
 
 CHIRPS = xr.open_dataset(data_dir+infile)
+#%%
 """
 #set spatial subset dimensions
 minlat = 16.; maxlat = 21.
@@ -39,3 +40,4 @@ CHsubSl.load()
 CHsubSl2 = CHsubSl.mean(dim=["longitude", "latitude"]).to_pandas()
 CHsubSl2.plot()
 t2= mk.seasonal_test(CHsubSl2, period = 12)
+#%%
