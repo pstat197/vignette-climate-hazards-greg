@@ -111,9 +111,9 @@ ts_s_adj = congo_train - congo_train.shift(12)
 ts_s_adj = ts_s_adj.dropna()
 ts_s_adj.plot(figsize=(40,6))
 #%% DON'T RUN!!!
-ts_s_adj = congo_test - congo_test.shift(12)
-ts_s_adj = ts_s_adj.dropna()
-ts_s_adj.plot(figsize=(40,6))
+#ts_s_adj = congo_test - congo_test.shift(12)
+#ts_s_adj = ts_s_adj.dropna()
+#ts_s_adj.plot(figsize=(40,6))
 
 #%%
 from statsmodels.graphics.tsaplots import plot_acf, plot_pacf
@@ -161,10 +161,11 @@ for param in pdq:
             continue
 #%%
 #ARIMA(0, 1, 1)x(2, 1, 0, 12)
-#(1,0,0)*(2,1,0, 12)
+#(1,0,0)*(2,1,0, 12): when ran alex's code: also got around same p-value
 mod = sm.tsa.statespace.SARIMAX(ts_s_adj,
                                 order=(1, 0, 0),
                                 seasonal_order=(0, 0, 1, 12))
+
 results = mod.fit(method = 'powell')
 print(results.summary().tables[1])
 # %%
@@ -204,8 +205,10 @@ print('The Root Mean Squared Error is {}'.format(round(np.sqrt(mse), 2)))
 #new MSE: 119.96
 #Root MSE: 10.95
 
-#with train: 38
+#with train: 38.0
 #root mse: 6.16
+
+###IGNORE BELOW:
 #%%
 # select DJF
 DA_DJF = drop_2mon.sel(time=drop_2mon.time.dt.season=="DJF")
