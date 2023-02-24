@@ -53,7 +53,7 @@ minlon = 12; maxlon = 32.
 plot_month3 = congo.mean(dim=["longitude", "latitude"]).to_pandas()
 plot_month3.plot()
 #t0= mk.seasonal_test(plot_month, period = 40)
-##don't run below!!!!
+
 #%% SARIMA 
 congo_reset = plot_month3.reset_index()
 ts_congo = congo_reset[['time', 'precip']]
@@ -110,7 +110,7 @@ print(kpss_test(congo_train)) #kpss p-value too high (0.1 or above. need to shif
 ts_s_adj = congo_train - congo_train.shift(12)
 ts_s_adj = ts_s_adj.dropna()
 ts_s_adj.plot(figsize=(40,6))
-#%%
+#%% DON'T RUN!!!
 ts_s_adj = congo_test - congo_test.shift(12)
 ts_s_adj = ts_s_adj.dropna()
 ts_s_adj.plot(figsize=(40,6))
