@@ -117,7 +117,7 @@ ts_s_adj.plot(figsize=(40,6))
 
 #%%
 from statsmodels.graphics.tsaplots import plot_acf, plot_pacf
-plot_acf(ts_s_adj, lags=100)
+plot_acf(ts_s_adj, lags=60)
 matplotlib.pyplot.show()
 plot_pacf(ts_s_adj, lags=100, method = 'ywm')
 matplotlib.pyplot.show()
