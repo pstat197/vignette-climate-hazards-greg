@@ -125,7 +125,7 @@ matplotlib.pyplot.show()
 #ax.xaxis.set_ticks
 #%%
 p = range(0, 3)
-d = range(0,1)
+d = range(0, 2)
 q = range(0, 3)
 pdq = list(itertools.product(p, d, q))
 seasonal_pdq = [(x[0], x[1], x[2], 12) for x in list(itertools.product(p, d, q))]
@@ -134,7 +134,7 @@ print('SARIMAX: {} x {}'.format(pdq[1], seasonal_pdq[1]))
 print('SARIMAX: {} x {}'.format(pdq[1], seasonal_pdq[2]))
 print('SARIMAX: {} x {}'.format(pdq[2], seasonal_pdq[3]))
 print('SARIMAX: {} x {}'.format(pdq[2], seasonal_pdq[4]))
-
+#%% 
 for param in pdq:
     for param_seasonal in seasonal_pdq:
         try:
@@ -147,7 +147,7 @@ for param in pdq:
             print('ARIMA{}x{}12 - AIC:{}'.format(param, param_seasonal, results.aic))
         except:
             continue
-#%%
+#%% diff 
 for param in pdq:
     for param_seasonal in seasonal_pdq:
         try:
@@ -168,6 +168,14 @@ mod = sm.tsa.statespace.SARIMAX(ts_s_adj,
 
 results = mod.fit(method = 'powell')
 print(results.summary().tables[1])
+#%% not diff
+mod = sm.tsa.statespace.SARIMAX(congo_train,
+                                order=(1, 0, 0),
+                                seasonal_order=(2, 1, 0, 12))
+
+results = mod.fit(method = 'powell')
+print(results.summary().tables[1])
+
 # %%
 results.plot_diagnostics(figsize=(18, 8))
 plt.show()
