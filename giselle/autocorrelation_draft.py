@@ -191,13 +191,7 @@ ax.fill_between(pred_ci.index,
                 pred_ci.iloc[:, 1], color='k', alpha=.2)
 ax.set_xlabel('time')
 ax.set_ylabel('precip')
-#data.iloc[499:999].plot(y='value')
-#df = pd.DataFrame(np.random.randn(10, 5), columns=list('abcde'))
-#df.iloc[0:6].plot(y='e')
-#print(df.iloc[0:6])
-# plt.show()
-#pred.iloc[5:60].plot(y='')
-#pred.iloc[6:50].plot()
+
 plt.legend()
 
 plt.show()
