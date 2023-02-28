@@ -13,7 +13,7 @@ import matplotlib.pyplot as plt
 count_bord = cartopy.feature.NaturalEarthFeature('cultural','admin_0_boundary_lines_land','110m',facecolor='none')
 #%% read in climatologyss
 # get data from https://data.chc.ucsb.edu/products/CHPclim/netcdf/
-data_dir = '/Users/foamy/Downloads/CHC/netcdf/'
+data_dir = '/Users/disha/downloads/'
 infile = 'chirps-v2.0.monthly.nc'
 CHIRPS = xr.open_dataset(data_dir+infile,chunks = "auto")
 #set spatial subset dimensions
@@ -22,6 +22,7 @@ AvgPrec25 = AvgPrec.where(AvgPrec.values <25)
 AvgPrec10 = AvgPrec.where(AvgPrec.values <10)
 AvgPrec5 = AvgPrec.where(AvgPrec.values < 5)
 AvgPrec.plot.hist()
+#%%
 """
 #INITIAL AVERAGE 
 projection = ccrs.PlateCarree()  #set the projection of the map
