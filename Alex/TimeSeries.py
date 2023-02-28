@@ -18,15 +18,20 @@ import cartopy.crs as ccrs
 import seaborn
 import cartopy.feature
 import matplotlib.pyplot as plt
+<<<<<<< HEAD
 import pymannkendall as mk
 import statsmodels.graphics.tsaplots as sm
 import statsmodels.tsa.seasonal as sms
 
+=======
+#import pymannkendall as mk
+>>>>>>> 3d515bc992e157ac331699f8969fe4fd0204988e
 count_bord = cartopy.feature.NaturalEarthFeature('cultural','admin_0_boundary_lines_land','110m',facecolor='none')
-data_dir = '/Users/foamy/Downloads/CHC/'
+data_dir = '/Users/disha/downloads/'
 infile = 'chirps-v2.0.monthly.nc'
 
 CHIRPS = xr.open_dataset(data_dir+infile)
+#%%
 """
 #set spatial subset dimensions
 minlat = 16.; maxlat = 21.
@@ -44,6 +49,7 @@ CHsubSl.load()
 CHsubSl2 = CHsubSl.mean(dim=["longitude", "latitude"]).to_pandas()
 CHsubSl2.plot()
 t2= mk.seasonal_test(CHsubSl2, period = 12)
+<<<<<<< HEAD
 
 
 #Transformations for Sierra Leone '
@@ -60,3 +66,6 @@ SL_log.plot() #ts of log transformed data
 result=sms.seasonal_decompose(SL_log, model='additive', period=12) 
 result.plot()   
 """
+=======
+#%%
+>>>>>>> 3d515bc992e157ac331699f8969fe4fd0204988e
