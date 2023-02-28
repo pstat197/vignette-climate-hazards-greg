@@ -77,8 +77,8 @@ P val < 0.05 indicates data is stationary
 '''
 # %%
 ## SPLIT DATA
-SL_test = SierraLeoneSlice.loc['2021-01-01 00:00:00': '2022-12-01 00:00:00']
-SL_train = SierraLeoneSlice.loc[: '2020-12-01 00:00:00']
+SL_test = SierraLeoneSlice.loc['2014-01-01 00:00:00': '2022-12-01 00:00:00']
+SL_train = SierraLeoneSlice.loc[: '2013-12-01 00:00:00']
 
 #%%
 ## ARIMA model
@@ -148,7 +148,7 @@ from statsmodels.tsa.statespace.sarimax import SARIMAX
 
 
 # %%
-plt.plot(SL_train.loc['2020-01-01 00:00:00':'2020-12-01 00:00:00'], color = "black")
+plt.plot(SL_train.loc['2012-01-01 00:00:00':'2020-12-01 00:00:00'], color = "black")
 plt.plot(SL_test, color = "red")
 plt.ylabel('precip')
 plt.xlabel('Date')
