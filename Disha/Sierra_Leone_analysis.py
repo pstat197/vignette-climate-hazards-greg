@@ -76,9 +76,14 @@ print(dfoutput)
 P val < 0.05 indicates data is stationary
 '''
 # %%
+## SPLIT DATA
+SL_test = SierraLeoneSlice.loc['2021-01-01 00:00:00': '2022-12-01 00:00:00']
+SL_train = SierraLeoneSlice.loc[: '2020-12-01 00:00:00']
+
+#%%
 ## ARIMA model
 import pmdarima as pm
-ARIMA_model = pm.auto_arima(diff12, 
+ARIMA_model = pm.auto_arima(SL_train, 
                       start_p=1, 
                       start_q=1,
                       test='adf', # use adftest to find optimal 'd'
@@ -96,7 +101,7 @@ plt.show()
 # %%
 ## SARIMA Model
 # Seasonal - fit stepwise auto-ARIMA
-SARIMA_model = pm.auto_arima(diff12, start_p=1, start_q=1,
+SARIMA_model = pm.auto_arima(SL_train, start_p=1, start_q=1,
                          test='adf',
                          max_p=3, max_q=3, 
                          m=12, #12 is the frequncy of the cycle
@@ -109,10 +114,14 @@ SARIMA_model = pm.auto_arima(diff12, start_p=1, start_q=1,
                          suppress_warnings=True, 
                          stepwise=True)
 # %%
+print(SARIMA_model)
+## ARIMA(1,0,0)(2,1,0)[12] 
+#%%
+## PLOT DIAGNOSTICS
 SARIMA_model.plot_diagnostics(figsize=(15,12))
 plt.show()
 # %%
-def forecast(ARIMA_model, periods=24):
+def forecast(ARIMA_model, periods=12):
     # Forecast
     n_periods = periods
     fitted, confint = ARIMA_model.predict(n_periods=n_periods, return_conf_int=True)
@@ -135,7 +144,27 @@ def forecast(ARIMA_model, periods=24):
     plt.title("ARIMA/SARIMA - Sierra Leone Forecast")
     plt.show()
 #%%
-forecast(SARIMA_model)
+from statsmodels.tsa.statespace.sarimax import SARIMAX
 
 
 # %%
+plt.plot(SL_train.loc['2020-01-01 00:00:00':'2020-12-01 00:00:00'], color = "black")
+plt.plot(SL_test, color = "red")
+plt.ylabel('precip')
+plt.xlabel('Date')
+plt.xticks(rotation=45)
+plt.title("Train/Test split for SL Data")
+
+SARIMAXmodel = SARIMAX(SL_train, order = (0, 0, 0), seasonal_order=(3,1,1,12))
+SARIMAXmodel = SARIMAXmodel.fit()
+
+y_pred = SARIMAXmodel.get_forecast(len(SL_test.index))
+y_pred_df = y_pred.conf_int(alpha = 0.05) 
+y_pred_df["Predictions"] = SARIMAXmodel.predict(start = y_pred_df.index[0], end = y_pred_df.index[-1])
+y_pred_df.index = SL_test.index
+y_pred_out = y_pred_df["Predictions"] 
+plt.plot(y_pred_out, color='Blue', label = 'SARIMA Predictions')
+plt.legend()
+
+# %%
+
