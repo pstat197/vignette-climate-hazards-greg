@@ -65,9 +65,9 @@ ts_congo = ts_congo.set_index('time')
 #%%
 ts_month_avg = ts_congo['precip'].resample('MS').mean()
 ts_month_avg.plot(figsize=(40,6))
-#%% training and testing
-congo_train = ts_month_avg.iloc[0:480]
-congo_test = ts_month_avg.iloc[480:]
+#%% training and testing (.8/.2)
+congo_train = ts_month_avg.iloc[0:392]
+congo_test = ts_month_avg.iloc[392:]
 #%%
 from pylab import rcParams
 rcParams['figure.figsize'] = 18, 8
@@ -100,21 +100,28 @@ def kpss_test(timeseries):
     print (kpss_output)
 print(kpss_test(congo_train)) #kpss p-value too high (0.1 or above. need to shift)
 #%%
-#ts_t_adj = ts_month_avg - ts_month_avg.shift(1)
-#ts_t_adj = ts_t_adj.dropna()
-#ts_t_adj.plot(figsize=(40,6))
+'''
+ts_t_adj = ts_month_avg - ts_month_avg.shift(1)
+ts_t_adj = ts_t_adj.dropna()
+ts_t_adj.plot(figsize=(40,6))
+'''
 #%%
-#print(adf_test(ts_t_adj))
-#print(kpss_test(ts_t_adj)) #now less than 0.00000
+'''
+print(adf_test(ts_t_adj))
+print(kpss_test(ts_t_adj)) #now less than 0.00000
+'''
 #%%
 ts_s_adj = congo_train - congo_train.shift(12)
 ts_s_adj = ts_s_adj.dropna()
 ts_s_adj.plot(figsize=(40,6))
 #%% DON'T RUN!!!
-#ts_s_adj = congo_test - congo_test.shift(12)
-#ts_s_adj = ts_s_adj.dropna()
-#ts_s_adj.plot(figsize=(40,6))
-
+'''
+ts_s_adj = ts_t_adj - ts_t_adj.shift(12)
+ts_s_adj = ts_s_adj.dropna()
+ts_s_adj.plot(figsize=(40,6))
+print(adf_test(ts_s_adj))
+print(kpss_test(ts_s_adj))
+'''
 #%%
 from statsmodels.graphics.tsaplots import plot_acf, plot_pacf
 plot_acf(ts_s_adj, lags=60)
@@ -138,7 +145,7 @@ print('SARIMAX: {} x {}'.format(pdq[2], seasonal_pdq[4]))
 for param in pdq:
     for param_seasonal in seasonal_pdq:
         try:
-            mod = sm.tsa.statespace.SARIMAX(y,
+            mod = sm.tsa.statespace.SARIMAX(congo_train,
                                             order=param,
                                             seasonal_order=param_seasonal,
                                             enforce_stationarity=False,
@@ -151,7 +158,7 @@ for param in pdq:
 for param in pdq:
     for param_seasonal in seasonal_pdq:
         try:
-            mod = sm.tsa.statespace.SARIMAX(ts_s_adj,
+            mod = sm.tsa.statespace.SARIMAX(congo_train,
                                             order=param,
                                             seasonal_order=param_seasonal,
                                             )
@@ -163,14 +170,14 @@ for param in pdq:
 #ARIMA(0, 1, 1)x(2, 1, 0, 12)
 #(1,0,0)*(2,1,0, 12): when ran alex's code: also got around same p-value
 mod = sm.tsa.statespace.SARIMAX(ts_s_adj,
-                                order=(1, 0, 0),
+                                order=(0, 1,  0),
                                 seasonal_order=(0, 0, 1, 12))
 
 results = mod.fit(method = 'powell')
 print(results.summary().tables[1])
 #%% not diff
 mod = sm.tsa.statespace.SARIMAX(congo_train,
-                                order=(1, 0, 0),
+                                order=(1,0,0),
                                 seasonal_order=(2, 1, 0, 12))
 
 results = mod.fit(method = 'powell')
@@ -180,24 +187,52 @@ print(results.summary().tables[1])
 results.plot_diagnostics(figsize=(18, 8))
 plt.show()
 #%%
+#values.astype('datetime64[D]')
 #results = results.iloc['1990-01-01 00:00:00': '2022-12-01 00:00:00']
-pred = results.get_prediction(start=pd.to_datetime('2020-01-01'), dynamic=False)
+#results.values.astype('datetime64[D]')
+pred = results.get_prediction(start=pd.to_datetime('2013-09-01'), dynamic=False)#start=pd.to_datetime('2014-01-01'), dynamic=False
 pred_ci = pred.conf_int()
-ax = ts_s_adj.iloc[400:].plot(label='observed')
+ax = ts_month_avg.iloc[350:].plot(label='observed')
 
 pred.predicted_mean.plot(ax=ax, label='One-step ahead Forecast', alpha=.7, figsize=(10, 4))
+#pred_ci= pred_ci.astype('datetime64[D]')
 ax.fill_between(pred_ci.index,
                 pred_ci.iloc[:, 0],
                 pred_ci.iloc[:, 1], color='k', alpha=.2)
+#ax.set_xlabel('time')
+#ax.set_ylabel('precip')
+
+#plt.legend()
+
+#plt.show()
+# %%
+#stop
+pred_uc = results.get_forecast(steps=150)
+pred_ci = pred_uc.conf_int()
+ax = ts_month_avg.iloc[350:].plot(label='observed', figsize=(14, 7))
+pred_uc.predicted_mean.plot(ax=ax, label='Forecast')
+ax.fill_between(pred_ci.index,
+                pred_ci.iloc[:, 0],
+                pred_ci.iloc[:, 1], color='k', alpha=.25)
 ax.set_xlabel('time')
 ax.set_ylabel('precip')
-
 plt.legend()
-
+plt.show()
+#%% DON't RUN
+pred_uc = results.get_forecast(steps=60)
+pred_ci = pred_uc.conf_int()
+ax = ts_month_avg.iloc[350:].plot(label='observed', figsize=(14, 7))
+pred_uc.predicted_mean.plot(ax=ax, label='Forecast')
+ax.fill_between(pred_ci.index,
+                pred_ci.iloc[:, 0],
+                pred_ci.iloc[:, 1], color='k', alpha=.25)
+ax.set_xlabel('Time')
+ax.set_ylabel('Precip')
+plt.legend()
 plt.show()
 #%%%
 y_forecasted = pred.predicted_mean
-y_truth = ts_s_adj['2020-01-01':]
+y_truth = congo_test['2013-09-01':]
 mse = ((y_forecasted - y_truth) ** 2).mean()
 print('The Mean Squared Error is {}'.format(round(mse, 2)))
 print('The Root Mean Squared Error is {}'.format(round(np.sqrt(mse), 2)))
@@ -210,6 +245,17 @@ print('The Root Mean Squared Error is {}'.format(round(np.sqrt(mse), 2)))
 #with train: 38.0
 #root mse: 6.16
 
+#with train and actual precip: 130.64
+#root mse: 11.43
+#%% 
+y_forecasted2 = pred_uc.predicted_mean
+y_truth2 = congo_test['2013-09-01':]
+mse2 = ((y_forecasted2 - y_truth2) ** 2).mean()
+print('The Mean Squared Error is {}'.format(round(mse2, 2)))
+print('The Root Mean Squared Error is {}'.format(round(np.sqrt(mse2), 2)))
+#forecast
+#mse: 193.49
+#rmse: 13.91
 ###IGNORE BELOW:
 #%%
 # select DJF
