@@ -211,8 +211,8 @@ plt.plot(train.iloc[410:], color = "black")
 plt.plot(test, color = "red")
 #plt.plot(y_pred_out, color='green', label = 'ARIMA Basic Predictions')
 #plt.plot(y_pred_out_2, color='yellow', label = 'ARIMA Con Predictions')
-plt.plot(y_pred_out3, color='Blue', label = 'SARIMA Prediction')
-plt.plot(y_pred_out4, color='purple', label = "SARIMA Predictions pt. 2")
+#plt.plot(y_pred_out3, color='Blue', label = 'SARIMA Prediction')
+plt.plot(y_pred_out4, color='blue', label = "SARIMA Predictions pt. 2")
 plt.ylabel('Precipitation')
 plt.xlabel('Time')
 plt.xticks(rotation=45)
@@ -224,10 +224,22 @@ plt.show()
 import numpy as np
 from sklearn.metrics import mean_squared_error
 
-arma_rmse3 = np.sqrt(mean_squared_error(test["precip"].values, y_pred_df3["Predictions"]))
-print("RMSE: ",arma_rmse3)
+arma_rmse4 = np.sqrt(mean_squared_error(test["precip"].values, y_pred_df4["Predictions"]))
+print("RMSE: ",arma_rmse4)
 #7.9979
+
 # %%
+pred_uc = results.get_forecast(steps=50)
+pred_ci = pred_uc.conf_int()
+ax = y.plot(label='observed', figsize=(14, 7))
+pred_uc.predicted_mean.plot(ax=ax, label='Forecast')
+ax.fill_between(pred_ci.index,
+                pred_ci.iloc[:, 0],
+                pred_ci.iloc[:, 1], color='k', alpha=.25)
+ax.set_xlabel('Date')
+ax.set_ylabel('Furniture Sales')
+plt.legend()
+plt.show()
 #%%
 import numpy as np
 from sklearn.metrics import mean_squared_error
