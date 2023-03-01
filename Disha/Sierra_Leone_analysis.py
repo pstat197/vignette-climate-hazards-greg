@@ -81,6 +81,7 @@ SL_test = SierraLeoneSlice.loc['2014-01-01 00:00:00': '2022-12-01 00:00:00']
 SL_train = SierraLeoneSlice.loc[: '2013-12-01 00:00:00']
 
 #%%
+'''
 ## ARIMA model
 import pmdarima as pm
 ARIMA_model = pm.auto_arima(SL_train, 
@@ -143,10 +144,11 @@ def forecast(ARIMA_model, periods=12):
 
     plt.title("ARIMA/SARIMA - Sierra Leone Forecast")
     plt.show()
+
+forecast(SARIMA_model)
+'''
 #%%
 from statsmodels.tsa.statespace.sarimax import SARIMAX
-
-
 # %%
 plt.plot(SL_train.loc['2012-01-01 00:00:00':'2020-12-01 00:00:00'], color = "black")
 plt.plot(SL_test, color = "red")
@@ -167,4 +169,10 @@ plt.plot(y_pred_out, color='Blue', label = 'SARIMA Predictions')
 plt.legend()
 
 # %%
+# RMSE 
+from sklearn.metrics import mean_squared_error
+sarma_rmse = np.sqrt(mean_squared_error(SL_test.values, y_pred_df["Predictions"]))
+print("RMSE: ",sarma_rmse)
 
+## RMSE:  43.2314827951053
+# %%
