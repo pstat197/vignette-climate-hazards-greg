@@ -188,6 +188,8 @@ print(results.summary().tables[1])
 # %%
 #(1,0,0)*(2,1,0, 12)
 #%% alex sarima code
+#%%multiclass - week 8 in R???? 
+#one step - do multistep (recursion)
 SARIMAXmodel = SARIMAX(y, order = (1,0,0), seasonal_order=(2,1,0,12))
 SARIMAXmodel = SARIMAXmodel.fit()
 
@@ -229,15 +231,15 @@ print("RMSE: ",arma_rmse4)
 #7.9979
 
 # %%
-pred_uc = results.get_forecast(steps=50)
+pred_uc = results.get_forecast(steps=150)
 pred_ci = pred_uc.conf_int()
-ax = y.plot(label='observed', figsize=(14, 7))
+ax = ts_congo.iloc[350:].plot(label='observed', figsize=(14, 7))
 pred_uc.predicted_mean.plot(ax=ax, label='Forecast')
 ax.fill_between(pred_ci.index,
                 pred_ci.iloc[:, 0],
                 pred_ci.iloc[:, 1], color='k', alpha=.25)
 ax.set_xlabel('Date')
-ax.set_ylabel('Furniture Sales')
+ax.set_ylabel('precip')
 plt.legend()
 plt.show()
 #%%

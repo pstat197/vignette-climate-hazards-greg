@@ -66,8 +66,8 @@ ts_congo = ts_congo.set_index('time')
 ts_month_avg = ts_congo['precip'].resample('MS').mean()
 ts_month_avg.plot(figsize=(40,6))
 #%% training and testing (.8/.2)
-congo_train = ts_month_avg.iloc[0:392]
-congo_test = ts_month_avg.iloc[392:]
+congo_train = ts_month_avg.iloc[0:468]
+congo_test = ts_month_avg.iloc[468:]
 #%%
 from pylab import rcParams
 rcParams['figure.figsize'] = 18, 8
@@ -190,21 +190,18 @@ plt.show()
 #values.astype('datetime64[D]')
 #results = results.iloc['1990-01-01 00:00:00': '2022-12-01 00:00:00']
 #results.values.astype('datetime64[D]')
-pred = results.get_prediction(start=pd.to_datetime('2013-09-01'), dynamic=False)#start=pd.to_datetime('2014-01-01'), dynamic=False
+pred = results.get_prediction(start=pd.to_datetime('2020-01-01'), dynamic=False)
 pred_ci = pred.conf_int()
-ax = ts_month_avg.iloc[350:].plot(label='observed')
+ax = ts_month_avg.iloc[400:].plot(label='observed')
 
 pred.predicted_mean.plot(ax=ax, label='One-step ahead Forecast', alpha=.7, figsize=(10, 4))
-#pred_ci= pred_ci.astype('datetime64[D]')
 ax.fill_between(pred_ci.index,
                 pred_ci.iloc[:, 0],
                 pred_ci.iloc[:, 1], color='k', alpha=.2)
-#ax.set_xlabel('time')
-#ax.set_ylabel('precip')
-
-#plt.legend()
-
-#plt.show()
+ax.set_xlabel('time')
+ax.set_ylabel('precip')
+plt.legend()
+plt.show()
 # %%
 #stop
 pred_uc = results.get_forecast(steps=150)
@@ -232,7 +229,7 @@ plt.legend()
 plt.show()
 #%%%
 y_forecasted = pred.predicted_mean
-y_truth = congo_test['2013-09-01':]
+y_truth = congo_test['2020-01-01':]
 mse = ((y_forecasted - y_truth) ** 2).mean()
 print('The Mean Squared Error is {}'.format(round(mse, 2)))
 print('The Root Mean Squared Error is {}'.format(round(np.sqrt(mse), 2)))
@@ -249,13 +246,16 @@ print('The Root Mean Squared Error is {}'.format(round(np.sqrt(mse), 2)))
 #root mse: 11.43
 #%% 
 y_forecasted2 = pred_uc.predicted_mean
-y_truth2 = congo_test['2013-09-01':]
+y_truth2 = congo_test['2020-01-01':]
 mse2 = ((y_forecasted2 - y_truth2) ** 2).mean()
 print('The Mean Squared Error is {}'.format(round(mse2, 2)))
 print('The Root Mean Squared Error is {}'.format(round(np.sqrt(mse2), 2)))
 #forecast
 #mse: 193.49
 #rmse: 13.91
+
+#195.03 (last two years)
+#rmse: 13.97
 ###IGNORE BELOW:
 #%%
 # select DJF
