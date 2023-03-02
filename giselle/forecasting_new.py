@@ -123,7 +123,7 @@ plt.show()
 #UNTIL 2033
 pred_uc = results.get_forecast(steps=150)
 pred_ci = pred_uc.conf_int()
-ax = ts_month_avg.iloc[350:].plot(label='observed', figsize=(14, 7))
+ax = ts_month_avg.iloc[440:].plot(label='observed', figsize=(20, 7))
 pred_uc.predicted_mean.plot(ax=ax, label='Forecast')
 ax.fill_between(pred_ci.index,
                 pred_ci.iloc[:, 0],
