@@ -33,9 +33,10 @@ congo.load()
 
 congo_ps = congo.mean(dim=["longitude", "latitude"]).to_pandas() #convert to pandas
 
-#time series plot 
+#time series plot  
 congo_tst = congo_ps.loc['2021-01-01 00:00:00': '2022-12-01 00:00:00']
 congo_tr = congo_ps.loc[: '2020-12-01 00:00:00']
+"""
 plt.figure(figsize=(10,5))
 plt.plot(congo_tr, color='blue',label='Original')
 plt.xlabel('Year')
@@ -57,6 +58,7 @@ plt.title('Precipitation in mm')
 
 
 #CHECK FOR STATIONARITY
+
 plt.figure(figsize=(20,5))
 plt.plot(congo_tr, color='blue',label='Original')
 plt.plot(congo_tr.rolling(window=12).mean(), label='12-Months Rolling Mean')
@@ -86,8 +88,8 @@ plt.plot(congo_12)
 sm.plot_acf(congo_12.dropna(),lags=36)
 sm.plot_pacf(congo_12.dropna(),lags=36, method = "ywm")
 #plt.hist(congo_12)
-
-
+"""
+"""
 #CHECK FOR STATIONARITY of differenced 
 plt.figure(figsize=(20,5))
 plt.plot(congo_12, color='blue',label='Original')
@@ -97,9 +99,30 @@ plt.xlabel('Year')
 plt.ylabel('Precipitation(mm)')
 plt.title('Precipitation in mm')
 """
+
 #create model 
-model=auto_arima(congo_12.dropna(), start_p = 0, start_q = 0,D=1, m = 12,
+model=auto_arima(congo_tr.dropna(), start_p = 0, start_q = 0,D=1, m = 12,
                  seasonal = True, test = "adf",  trace = True, alpha = 0.05,
                  information_criterion = 'aic', suppress_warnings = True, 
                  stepwise = True)
-"""
+#picked model with ARIMA(1,0,0)(2,1,0)[12]    
+n_periods = 24
+fitted, confint = model.predict(n_periods=n_periods, return_conf_int=True)
+index_of_fc = pd.date_range(congo_tr.index[-1]+pd.DateOffset(months=1), periods = n_periods, freq='MS')
+
+# make series for plotting purpose
+fitted_series = pd.Series(fitted, index=index_of_fc)
+lower_series = pd.Series(confint[:, 0], index=index_of_fc)
+upper_series = pd.Series(confint[:, 1], index=index_of_fc)
+
+# Plot
+plt.plot(congo_tr['2019-01-01 00:00:00':])
+plt.plot(fitted_series, color='darkgreen')
+plt.fill_between(lower_series.index, 
+                 lower_series, 
+                 upper_series, 
+                 color='k', alpha=.15)
+
+plt.title("SARIMA - Final Forecast of precipitation")
+plt.show()
+rmse = np.sqrt(np.mean((fitted - congo_tst.iloc[:,0].values)**2))
