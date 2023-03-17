@@ -34,9 +34,13 @@ file_paths = ['/Users/foamy/Downloads/CHC/PETmonthly_01.nc','/Users/foamy/Downlo
               '/Users/foamy/Downloads/CHC/PETmonthly_11.nc','/Users/foamy/Downloads/CHC/PETmonthly_12.nc']
 PET_monthly = xr.open_mfdataset(file_paths, combine='nested', concat_dim='date')
 PET_monthly = PET_monthly.sortby('date')
+data_dir = '/Users/foamy/Downloads/CHC/'
+infile = 'chirps-v2.0.monthly.nc'
+CHIRPS= xr.open_dataset(data_dir+infile,chunks = "auto")
+CHIRPS_monthly = CHIRPS.rename({'time': 'date', 'latitude': 'lats', 'longitude': 'lons'})
 
 """
-#Map of January Averagem PET
+#Map of January Average PET
 PET_Jan = PET_daily.sel(date=PET_daily['date.month']==1).PET.mean('date')
 
 projection = ccrs.PlateCarree()  #set the projection of the map
@@ -52,13 +56,67 @@ ax.coastlines(color='gray') #draw the coastlines in gray
 #ax.add_feature(cartopy.feature.OCEAN,color='skyblue',zorder=100) #color the oceans
 cb = plt.colorbar(janmap,cax=fig.add_axes([0.1,0.09,0.8,0.03]), orientation='horizontal') #add colorbar
 """
-minlat = 5.025; maxlat = -17.025
-minlon = 12; maxlon = 32.
-congo =  PET_monthly.sel(lats=slice(minlat,maxlat),lons=slice(minlon,maxlon))
-congo.load()
 
-congo_ps = congo.mean(dim=["lats", "lons"]).to_pandas() #convert to pandas
+
+
+
+minlat = -36; maxlat = 0
+minlon = 7.5; maxlon = 50
+SA_PET =  PET_monthly.sel(lats=slice(minlat,maxlat),lons=slice(minlon,maxlon))
+SA_PPT =  CHIRPS_monthly.sel(lats=slice(minlat,maxlat),lons=slice(minlon,maxlon))
+SA_PPT.load()
+
+#congo_ps = congo.mean(dim=["lats", "lons"]).to_pandas() #convert to pandas
+
+
 """
+#DJF PET map 
+SA_PET_DJF = SA_PET.sel(date=(SA_PET['date.month']==12) | (SA_PET['date.month']<=2)).PET.std('date')
+projection = ccrs.PlateCarree()  #set the projection of the map
+fig = plt.figure(figsize=(12,4))  #make the window for the graphics
+ax = plt.axes([0.05,0.15,0.5,0.8],projection=projection)  # set the drawing area within the window
+
+SA_PET_DJF_MAP = plt.pcolormesh(SA_PET_DJF.lons,SA_PET_DJF.lats,SA_PET_DJF,\
+                        vmin=0, vmax=40, cmap='magma')
+        
+ax.set_title('DJF Evapotranspiration Standard Deviation')  #put a title on the map
+ax.coastlines(color='gray') #draw the coastlines in gray
+ax.add_feature(cartopy.feature.BORDERS)
+ax.add_feature(cartopy.feature.OCEAN,color='skyblue',zorder=100) #color the oceans
+cb = plt.colorbar(SA_PET_DJF_MAP,cax=fig.add_axes([0.1,0.09,0.4,0.03]), orientation='horizontal') #add colorbar
+"""
+
+
+
+
+#DJF PPT map 
+SA_PPT_DJF = SA_PPT.sel(date=(SA_PPT['date.month']==12) | (SA_PPT['date.month']<=2)).precip.mean('date')
+
+projection = ccrs.PlateCarree()  #set the projection of the map
+fig = plt.figure(figsize=(12,4))  #make the window for the graphics
+ax = plt.axes([0.05,0.15,0.5,0.8],projection=projection)  # set the drawing area within the window
+
+SA_PPT_DJF_MAP = plt.pcolormesh(SA_PPT_DJF.lons,SA_PPT_DJF.lats,SA_PPT_DJF,\
+                        vmin=0, vmax=200, cmap='magma')
+        
+ax.set_title('DJF Rainfall Standard Deviation')  #put a title on the map
+ax.coastlines(color='gray') #draw the coastlines in gray
+ax.add_feature(cartopy.feature.BORDERS)
+ax.add_feature(cartopy.feature.OCEAN,color='skyblue',zorder=100) #color the oceans
+cb = plt.colorbar(SA_PPT_DJF_MAP,cax=fig.add_axes([0.1,0.09,0.4,0.03]), orientation='horizontal') #add colorbar
+"""
+
+# MAKE DATASETS MATCH (not sure how important this is)
+
+SA_PPT_DJF = SA_PPT_DJF.assign_coords(lats=SA_PET_DJF.lats)
+SA_PPT_DJF = SA_PPT_DJF.assign_coords(lons=SA_PET_DJF.lons)
+SA_PPT_DJF=SA_PPT_DJF.expand_dims(dim="time", axis=0)
+SA_PET_DJF=SA_PET_DJF.expand_dims(dim="time", axis=0)
+
+
+
+
+
 #Simple EDA
 #Time series
 plt.figure(figsize=(10,5))
