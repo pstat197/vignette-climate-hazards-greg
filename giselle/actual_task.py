@@ -128,15 +128,16 @@ diff_s = s_hemi.groupby("time.season") - sum_season
 AOIts = s_hemi.precip.sel(latitude=slice(minlat+5,maxlat-5), (longitude=slice(minlon+5,maxlon-5)), \
                      mean(dim=['latitude','longitude']))
 
-4 - create 3-month totals, and then print the first 12 values (Jan-Dec, 1981) for a single point to convince yourself that it has made the moving sum.  CHsub3mo.precip[2,y,x] should equal the sum of CHsub.precip[0:2,y,x].
-
+#4 - create 3-month totals, and then print the first 12 values (Jan-Dec, 1981) for a single point to convince yourself that it has made the moving sum.  
+# CHsub3mo.precip[2,y,x] should equal the sum of CHsub.precip[0:2,y,x].
+'''
 # monthly 3-month totals of rainfall
 CHsub3mo = CHsub.rolling(time=3).sum()
 x=200
 y=200
 print(CHsub.precip[0:12,y,x].values)
 print(CHsub3mo.precip[0:12,y,x].values) 
-
+'''
 #%%
 #find the index of the maximum value
 maxind = precip_4.precip.argmax(dim="time")

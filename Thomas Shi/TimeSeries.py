@@ -10,24 +10,76 @@ import xarray as xr
 import cartopy.crs as ccrs
 import cartopy.feature
 import matplotlib.pyplot as plt
-import statsmodels.api as sm
 import pandas as pd
 import seaborn as sns
-from statsmodels.graphics.tsaplots import plot_acf, plot_pacf
-from statsmodels.tsa.seasonal import seasonal_decompose
-from scipy import stats
+from scipy.stats import gamma as gamdist
+from scipy.stats import norm
+from scipy.stats import fisk
+from scipy.special import comb, gamma
+import glob
+import rasterio
 
-count_bord = cartopy.feature.NaturalEarthFeature('cultural','admin_0_boundary_lines_land','110m',facecolor='none')
-data_dir = 'C:/Users/xusen/Downloads/'
+
+#count_bord = cartopy.feature.NaturalEarthFeature('cultural','admin_0_boundary_lines_land','110m',facecolor='none')
+data_dir = 'C:/Users/xusen/Desktop/'
+
 infile = 'chirps-v2.0.monthly.nc'
 
 clim = xr.open_dataset(data_dir+infile)
 
 #set spatial subset dimensions
-minlat = 10.; maxlat = 13.
-minlon = 6; maxlon = 10.
-CHsub_leone =  clim.sel(latitude=slice(minlat,maxlat),longitude=slice(minlon,maxlon),)
-CHsub_leone.load()
+minlat = -23; maxlat = -15.
+minlon = 24; maxlon = 34.
+SA_PPT = clim.sel(latitude=slice(minlat,maxlat),longitude=slice(minlon,maxlon))
+SA_PPT.load()
+
+SA_timeSeries = SA_PPT.mean(dim = ['longitude', 'latitude']).to_pandas()
+
+SA_timeSeries = SA_timeSeries.dropna()
+
+
+def Precip_2_SPI(ints, MIN_POSOBS=12, NORM_THRESH=160.0):
+    ts = np.reshape(ints, len(ints))
+
+    p_norain = np.sum(ts == 0.00) / len(ts)
+
+    poslocs = np.where(ts > 0.000)
+    posvals = ts[poslocs]
+
+    if len(poslocs[0]) < MIN_POSOBS:
+        return np.zeros(len(ints))
+    else:
+        a1, loc1, b1 = gamdist.fit(posvals, floc=0.0)
+        xi = np.zeros(len(posvals))
+
+        if a1 <= NORM_THRESH:
+            xi = gamdist.cdf(posvals, a1, loc=loc1, scale=b1)
+        else:
+            xi = norm.cdf(posvals, loc=np.mean(posvals), scale=np.std(posvals))
+
+        pxi = np.zeros(len(ts))
+        pxi[poslocs] = xi
+        prob = p_norain + ((1.0 - p_norain) * pxi)
+
+        if p_norain > 0.5:
+            for i in np.argwhere(ts < 7):
+                prob[i] = 0.5
+
+        if np.sum(prob >= 1.0000) > 0:
+            prob[np.where(prob >= 1.000)] = 0.9999999
+
+        return norm.ppf(prob)
+
+SA_array = SA_timeSeries['precip'].values
+
+spi = Precip_2_SPI(SA_array, MIN_POSOBS=12, NORM_THRESH=160.0)
+print(spi)
+
+
+plt.plot(spi)
+plt.title('SPI')
+plt.show()
+'''
 CHsubSl2 = CHsub_leone.mean(dim=["longitude", "latitude"]).to_pandas()
 #The whole time series
 #CHsubSl2.plot()
@@ -82,6 +134,7 @@ plt.show()
 
 
 #CHsub.fillna(0)
+'''
 '''
 per_25 = CHsub.fillna(0).precip.quantile(0, dim = 'time')
 projection = ccrs.PlateCarree()  #set the projection of the map
