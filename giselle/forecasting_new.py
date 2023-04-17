@@ -94,6 +94,18 @@ def kpss_test(timeseries):
     print (kpss_output)
 print(kpss_test(congo_train)) #kpss p-value too high (0.1 or above. need to shift)
 #%%
+ts_t_adj = congo_train - congo_train.shift(1)
+ts_t_adj = ts_t_adj.dropna()
+ts_t_adj.plot(figsize=(40,6))
+ts_s_adj = ts_t_adj - ts_t_adj.shift(12)
+ts_s_adj = ts_s_adj.dropna()
+ts_s_adj.plot()
+from statsmodels.graphics.tsaplots import plot_acf, plot_pacf
+plot_acf(ts_t_adj, lags=60)
+matplotlib.pyplot.show()
+plot_pacf(ts_t_adj, lags=100, method = 'ywm')
+matplotlib.pyplot.show()
+#%%
 ts_s_adj = congo_train - congo_train.shift(12)
 ts_s_adj = ts_s_adj.dropna()
 ts_s_adj.plot(figsize=(40,6))
@@ -111,7 +123,7 @@ matplotlib.pyplot.show()
 #%% not diff
 mod = sm.tsa.statespace.SARIMAX(congo_train,
                                 order=(1,0,0),
-                                seasonal_order=(2, 1, 0, 12))
+                                seasonal_order=(0,1,1, 12))
 
 results = mod.fit(method = 'powell')
 print(results.summary().tables[1])
@@ -123,7 +135,7 @@ plt.show()
 #UNTIL 2033
 pred_uc = results.get_forecast(steps=150)
 pred_ci = pred_uc.conf_int()
-ax = ts_month_avg.iloc[440:].plot(label='observed', figsize=(20, 7))
+ax = ts_month_avg.iloc[400:].plot(label='observed', figsize=(20, 7))
 pred_uc.predicted_mean.plot(ax=ax, label='Forecast')
 ax.fill_between(pred_ci.index,
                 pred_ci.iloc[:, 0],
