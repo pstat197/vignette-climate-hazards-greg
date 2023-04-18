@@ -153,27 +153,30 @@ PPT = xr.open_dataset(PPT_dir+infile)
 
 # read in Hobbins
 PET_dir = '/home/chc-data-out/people/husak/forCapstone/'
-PET = xr.open_mfdataset(PET_dir+'*.nc',combine='nested',concat_dim='date').sortby('date')
+PET = xr.open_mfdataset(PET_dir+'*.nc',combine='nested',concat_dim='date')
+#this didn't work with the sortby('date') 
+#PET = xr.open_mfdataset(PET_dir+'*.nc',combine='nested',concat_dim='date').sortby('date')
 
 #set spatial subset dimensions and specific month
 minlat = -35.; maxlat = 0.
 minlon = 5.; maxlon = 50.
-moi = 5 # month of interest 1=Jan, 2=Feb, ... 12=Dec
+moi = 4 # month of interest 1=Jan, 2=Feb, ... 12=Dec
 
 PPTsub = PPT.sel(latitude=slice(minlat,maxlat),longitude=slice(minlon,maxlon),\
                  time=PPT['time.month'] == moi)
 PETsub = PET.sel(lats=slice(minlat,maxlat),lons=slice(minlon,maxlon),\
-                 date=PET['date.month'] == moi)
+                 date=PET['date.month'] == moi).sortby('date')
  
 tmpPPT = PPTsub.precip.values
 tmpPET = PETsub.PET.values
 
 print(tmpPPT.shape,tmpPET.shape,'these should have the same numbers, but out of order')
 
-subNY,subNX = tmpPET[:,:,0].shape
+#if the numbers aren't the same, then you might have to remove the final year from
+# the PPT because it may have been updated
+# tmpPPT = tmpPPT[:-1,:,:]
 
-tmplats = np.arange(subNY+1)*0.05 + minlat #make array of latitude edges for pcolormesh
-tmplons = np.arange(subNX+1)*0.05 + minlon #make array of longitude edges for pcolormesh
+subNY,subNX = tmpPET[:,:,0].shape
 
 r_vals = np.zeros([subNY,subNX]) * np.nan
 
@@ -190,17 +193,18 @@ print('{:10.2f} sec elapsed for correlation calculation'.format(toc-tic))
 # quick map of correlations
 projection = ccrs.PlateCarree()  #set the projection of the map
 fig = plt.figure(figsize=(6,6))  #make the window for the graphics
-ax = plt.subplot(111,projection=projection)  # set the drawing area within the window
+ax = fig.add_axes([0.05,0.05,0.9,0.9],projection=projection) # set the drawing area
+# ax = plt.subplot(111,projection=projection)  # set the drawing area within the window
 
 tmpmap = ax.pcolormesh(PETsub.lons,PETsub.lats,r_vals,\
-                        vmin=-1, vmax=1, cmap='BrBG')
+                        vmin=-1, vmax=1, cmap='tab20')
 
-ax.set_title('Map of Correlation')  #put a title on the map
+ax.set_title('Map of Correlation Month = {:02d}'.format(moi))  #put a title on the map
 ax.coastlines(color='gray') #draw the coastlines in gray
 ax.add_feature(count_bord,edgecolor='gray') #draw the country boundaries
 #ax.add_feature(cartopy.feature.OCEAN,color='skyblue',zorder=100) #color the oceans
+#fig.tight_layout()
 cb = plt.colorbar(tmpmap,cax=fig.add_axes([0.1,0.09,0.8,0.03]), orientation='horizontal') #add colorbar
-
 
 
 
