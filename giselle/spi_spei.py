@@ -142,7 +142,7 @@ CHsub = CHIRPSp.sel(latitude=slice(minlat,maxlat),longitude=slice(minlon,maxlon)
 CHsub.load()
 
 CHsub.precip[0,:,:].plot.pcolormesh()
-
+#%%
 #monthly average of the data
 climatology = CHsub.groupby('time.month').mean('time')  
 #each month's difference from the monthly average
@@ -197,35 +197,45 @@ CHIRPS_monthly = CHIRPS.rename({'time': 'date', 'latitude': 'lats', 'longitude':
 #%% correlations between PPT and PET
 
 # read in CHIRPS  
-
 PPT_dir = 'C:/Users/gizra/OneDrive/Documents/netcdf/'
 infile = 'chirps-v2.0.monthly (1).nc'
 PPT = xr.open_dataset(PPT_dir+infile)
-
-# read in Hobbins
-#PET_dir = 'C:/Users/gizra/OneDrive/Documents/netcdf/'
-#PET = xr.open_mfdataset(PET_dir+'*.nc',combine='nested',concat_dim='date').sortby('date')
 
 PET_monthly = xr.open_mfdataset(file_paths, combine='nested', concat_dim='date')
 PET_monthly = PET_monthly.sortby('date')
 
 PET = PET_monthly
-
+#%%
 #set spatial subset dimensions and specific month
-minlat = -35.; maxlat = 0.
-minlon = 5.; maxlon = 50.
-moi = 5 # month of interest 1=Jan, 2=Feb, ... 12=Dec
+minlat = -35.; maxlat = 40.#40.
+minlon = -20.; maxlon = 52. #-20, 52
+#minlat = -35.; maxlat = 0.
+#minlon = 5.; maxlon = 50.
+moi = 2 # month of interest 1=Jan, 2=Feb, ... 12=Dec
 
 PPTsub = PPT.sel(latitude=slice(minlat,maxlat),longitude=slice(minlon,maxlon),\
                  time=PPT['time.month'] == moi)
+#%%
+PPTsub.precip[0,:,:].plot.pcolormesh()
+#%% january only
+'''
+PET_pre = PET.sel(date=PET['date.year'] != 2023, \
+                  lats=slice(minlat,maxlat),lons=slice(minlon,maxlon))
+PETsub = PET_pre.sel(date=PET_pre['date.month'] == moi)
+'''
+
+#%%
 PETsub = PET.sel(lats=slice(minlat,maxlat),lons=slice(minlon,maxlon),\
                  date=PET['date.month'] == moi)
+#%%
+PETsub.PET[:,:,0].plot.pcolormesh()
+#%%
  
 tmpPPT = PPTsub.precip.values
 tmpPET = PETsub.PET.values
-
+#%%
 print(tmpPPT.shape,tmpPET.shape,'these should have the same numbers, but out of order')
-
+#%%
 subNY,subNX = tmpPET[:,:,0].shape
 
 tmplats = np.arange(subNY+1)*0.05 + minlat #make array of latitude edges for pcolormesh
@@ -235,14 +245,15 @@ r_vals = np.zeros([subNY,subNX]) * np.nan
 
 gvals = np.where(tmpPPT[0,:,:] >= 0.00)
 nvals = len(gvals[0])
-
+#%%
 tic = time.time()
 for i in range(nvals):
   r_vals[gvals[0][i],gvals[1][i]] = linregress(tmpPPT[:,gvals[0][i],gvals[1][i]],\
                       tmpPET[gvals[0][i],gvals[1][i],:])[2]
+#month (1) == 3, 298
 toc = time.time()
 print('{:10.2f} sec elapsed for correlation calculation'.format(toc-tic))    
-
+#%%
 # quick map of correlations
 projection = ccrs.PlateCarree()  #set the projection of the map
 fig = plt.figure(figsize=(6,6))  #make the window for the graphics
@@ -251,7 +262,7 @@ ax = plt.subplot(111,projection=projection)  # set the drawing area within the w
 tmpmap = ax.pcolormesh(PETsub.lons,PETsub.lats,r_vals,\
                         vmin=-1, vmax=1, cmap='BrBG')
 
-ax.set_title('Map of Correlation')  #put a title on the map
+ax.set_title('PPT/PET Correlation - February')  #put a title on the map
 ax.coastlines(color='gray') #draw the coastlines in gray
 ax.add_feature(count_bord,edgecolor='gray') #draw the country boundaries
 #ax.add_feature(cartopy.feature.OCEAN,color='skyblue',zorder=100) #color the oceans
