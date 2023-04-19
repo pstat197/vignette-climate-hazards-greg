@@ -211,7 +211,7 @@ minlat = -35.; maxlat = 40.#40.
 minlon = -20.; maxlon = 52. #-20, 52
 #minlat = -35.; maxlat = 0.
 #minlon = 5.; maxlon = 50.
-moi = 2 # month of interest 1=Jan, 2=Feb, ... 12=Dec
+moi = 7 # month of interest 1=Jan, 2=Feb, ... 12=Dec
 
 PPTsub = PPT.sel(latitude=slice(minlat,maxlat),longitude=slice(minlon,maxlon),\
                  time=PPT['time.month'] == moi)

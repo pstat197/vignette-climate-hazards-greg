@@ -55,7 +55,7 @@ minlon = -20.; maxlon = 52.
 #minlat = -35.; maxlat = 40.
 #minlon = -20.; maxlon = 52. 
 
-moi = 1 # month of interest 1=Jan, 2=Feb, ... 12=Dec
+moi = 7 # month of interest 1=Jan, 2=Feb, ... 12=Dec
 
 PPTsub = PPT.sel(latitude=slice(minlat,maxlat),longitude=slice(minlon,maxlon),\
                  time=PPT['time.month'] == moi)
@@ -69,7 +69,6 @@ PETsub.PET[:,:,0].plot.pcolormesh()
 #%% 
 tmpPPT = PPTsub.precip.values
 tmpPET = PETsub.PET.values
-tmpPET = tmpPET[:,:,:-1]
 
 print(tmpPPT.shape,tmpPET.shape,'these should have the same numbers, but out of order')
 
