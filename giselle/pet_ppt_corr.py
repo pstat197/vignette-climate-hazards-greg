@@ -89,7 +89,7 @@ for i in range(nvals):
                       tmpPET[gvals[0][i],gvals[1][i],:])[2]
 toc = time.time()
 print('{:10.2f} sec elapsed for correlation calculation'.format(toc-tic))    
-#%%
+#%% colorCET (color map)
 # quick map of correlations
 projection = ccrs.PlateCarree()  #set the projection of the map
 fig = plt.figure(figsize=(6,6))  #make the window for the graphics
