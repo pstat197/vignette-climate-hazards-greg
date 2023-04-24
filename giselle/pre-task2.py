@@ -18,7 +18,7 @@ count_bord = cartopy.feature.NaturalEarthFeature('cultural','admin_0_boundary_li
 # get data from https://data.chc.ucsb.edu/products/CHPclim/netcdf/
 #"C:\Users\gizra\Downloads\chpclim.5050.monthly.nc"
 data_dir = 'C:/Users/gizra/OneDrive/Documents/netcdf/'#'/home/chc-data-out/products/CHPclim/netcdf/'
-infile = 'chirps-v2.0.monthly.nc'
+infile = 'chirps-v2.0.monthly.nc (1)'
 
 #notes:
 #moving metric of variablity (50 yr: increasing)
