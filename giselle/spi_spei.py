@@ -1,3 +1,4 @@
+#spi_spei
 #%%
 import pandas as pd
 import numpy as np
@@ -20,12 +21,10 @@ import matplotlib.pyplot as plt
 #from CoreFuncs import FILL_HOBBINS_DEKAD_GLOBAL
 import hvplot.xarray
 import holoviews as hv
-
-from functions_greg import Precip_2_SPI, GET_LLD_PARS, GET_SPEI_FROM_D
 hv.extension('bokeh', width=80)
 count_bord = cartopy.feature.NaturalEarthFeature('cultural','admin_0_boundary_lines_land','110m',facecolor='none')
 #from CoreFuncs import FILL_HOBBINS_DEKAD_GLOBAL
-#from functions_greg import Precip_2_SPI, GET_LLD_PARS, GET_SPEI_FROM_D
+from functions_greg import Precip_2_SPI, GET_LLD_PARS, GET_SPEI_FROM_D
 #%% correlations between PPT and PET
 # read in CHIRPS  
 PPT_dir = 'C:/Users/gizra/OneDrive/Documents/netcdf/'
@@ -63,6 +62,7 @@ PPTsub = PPT.sel(latitude=slice(minlat,maxlat),longitude=slice(minlon,maxlon),\
                  time=PPT['time.month'] == moi)
 PETsub = PET.sel(lats=slice(minlat,maxlat),lons=slice(minlon,maxlon),\
                  date=PET['date.month'] == moi).sortby('date')
+
 #%%
 PPTsub.precip[0,:,:].plot.pcolormesh()
 #%%
@@ -87,12 +87,8 @@ nvals = len(gvals[0])
 #%%
 tic = time.time()
 for i in range(nvals):
-  #if std devation of precip (tmpPPT with gvals) = 0 or less than 1 (SKIP)
-  # if tmpPPT[:,gvals[0][i],gvals[1][i].std() > 1:#greater than 1: run below
-
   r_vals[gvals[0][i],gvals[1][i]] = linregress(tmpPPT[:,gvals[0][i],gvals[1][i]],\
                       tmpPET[gvals[0][i],gvals[1][i],:])[2]
-  
 toc = time.time()
 print('{:10.2f} sec elapsed for correlation calculation'.format(toc-tic))    
 #%% colorCET (color map)
@@ -112,35 +108,17 @@ ax.add_feature(count_bord,edgecolor='gray') #draw the country boundaries
 #fig.tight_layout()
 cb = plt.colorbar(tmpmap,cax=fig.add_axes([0.1,0.09,0.8,0.03]), orientation='horizontal') #add colorbar
 
-# %%
-minlat = -35.; maxlat = 13.
-minlon = -20.; maxlon = 52.
-SA_PET =  PET.sel(lats=slice(minlat,maxlat),lons=slice(minlon,maxlon))
-SA_PPT =  PPT.sel(latitude=slice(minlat,maxlat),longitude=slice(minlon,maxlon))
+#%%
+SA_PET =  PET_monthly.sel(lats=slice(minlat,maxlat),lons=slice(minlon,maxlon))
+SA_PPT =  CHIRPS_monthly.sel(lats=slice(minlat,maxlat),lons=slice(minlon,maxlon))
 SA_PPT.load()
-#%%
-plot_PET = SA_PET.mean(dim=["lons", "lats"]).to_pandas().reset_index()
-plot_PPT = SA_PPT.mean(dim=["longitude", "latitude"]).to_pandas().reset_index()
-#%%
-#dataframe[dataframe['Percentage'] > 80]
-#df[df['Credit-Rating'].str.contains('Fair')]
-PET_1 = plot_PET[plot_PET['date'].str.contains('01-01')]
 
-#%%
-SA_PPT_DJF = SA_PPT.sel(time=SA_PPT['time.month'].isin([1, 2, 12])).groupby('time.season').mean("time").values.to_pandas()
-#.resample(time='1Y')#.mean(dim='date').precip.mean(dim=('longitude', 'latitude')).to_pandas()
-#%%
+SA_PPT_DJF = SA_PPT.sel(date=SA_PPT['date.month'].isin([1, 2, 12])).resample(date='1Y').mean(dim='date').precip.mean(dim=('lons', 'lats')).to_pandas()
 SA_PET_DJF = SA_PET.sel(date=SA_PET['date.month'].isin([1, 2, 12])).resample(date='1Y').mean(dim='date').PET.mean(dim=('lons', 'lats')).to_pandas()
 SA_PET_DJF = SA_PET_DJF.iloc[:-1] #PET dataset has one more 
 D = (SA_PPT_DJF.array-SA_PET_DJF.array).to_numpy()
 
-#%%
+
 pd.DataFrame(Precip_2_SPI(SA_PPT_DJF.array)).plot()
 
 GET_SPEI_FROM_D(D)
-# %%
-#correlation (SPI and SPEI) compare to PET and PPT  (maps are similar)
-#calc residuals (linear relationship; complex b/t precip and PPT)
-#use precip to drive est of PPT
-#look at diff and our est of PET (per month and wet season)
-#PET: dependent var and PPT: independent variable
