@@ -32,12 +32,13 @@ minlat = -23; maxlat = -15.
 minlon = 24; maxlon = 34.
 SA_PPT = clim.sel(latitude=slice(minlat,maxlat),longitude=slice(minlon,maxlon))
 SA_PPT.load()
-
+print(SA_PPT)
+SA_Jan = SA_PPT.sel(time = SA_PPT['time.month'].isin(12)).precip.mean(dim=('longitude','latitude')).to_pandas()
 SA_timeSeries = SA_PPT.mean(dim = ['longitude', 'latitude']).to_pandas()
-
 SA_timeSeries = SA_timeSeries.dropna()
 
-
+SA_Jan = SA_Jan.dropna()
+print(SA_Jan)
 def Precip_2_SPI(ints, MIN_POSOBS=12, NORM_THRESH=160.0):
     ts = np.reshape(ints, len(ints))
 
@@ -70,15 +71,20 @@ def Precip_2_SPI(ints, MIN_POSOBS=12, NORM_THRESH=160.0):
 
         return norm.ppf(prob)
 
-SA_array = SA_timeSeries['precip'].values
+SA_Jan = SA_Jan.iloc[:].values
+spi_jan = Precip_2_SPI(SA_Jan, MIN_POSOBS=12, NORM_THRESH=160.0)
+print(spi_jan)
 
-spi = Precip_2_SPI(SA_array, MIN_POSOBS=12, NORM_THRESH=160.0)
-print(spi)
+ax = sns.displot(spi_jan)
 
+ax.set(title='Distribution of Dec SPI')
 
-plt.plot(spi)
-plt.title('SPI')
 plt.show()
+'''
+plt.plot(spi_jan)
+plt.title('SPI Dec')
+plt.show()
+'''
 '''
 CHsubSl2 = CHsub_leone.mean(dim=["longitude", "latitude"]).to_pandas()
 #The whole time series
