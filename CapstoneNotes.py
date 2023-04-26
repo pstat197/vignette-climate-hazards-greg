@@ -208,6 +208,27 @@ ax.add_feature(count_bord,edgecolor='gray') #draw the country boundaries
 cb = plt.colorbar(tmpmap,cax=fig.add_axes([0.1,0.09,0.8,0.03]), orientation='horizontal') #add colorbar
 plt.savefig('testmap_{:02d}.png'.format(moi),dpi=200)
 
+#%% Identify and map the ROI box
+roi_minlat = -23.; roi_maxlat = -14.
+roi_minlon = 25.; roi_maxlon = 35.
+
+projection = ccrs.PlateCarree()  #set the projection of the map
+fig = plt.figure(figsize=(6,6))  #make the window for the graphics
+ax = fig.add_axes([0.05,0.05,0.9,0.9],projection=projection) # set the drawing area
+tmpmap = ax.pcolormesh(PETsub.lons,PETsub.lats,r_vals,\
+                        vmin=-1, vmax=1, cmap='coolwarm')
+
+ax.set_title('Map of Correlation Month = {:02d}'.format(moi))  #put a title on the map
+ax.coastlines(color='gray') #draw the coastlines in gray
+ax.add_feature(count_bord,edgecolor='gray') #draw the country boundaries
+cb = plt.colorbar(tmpmap,cax=fig.add_axes([0.1,0.09,0.8,0.03]), orientation='horizontal') #add colorbar
+
+#now draw the box of interest
+boi1 = ax.plot([roi_minlon,roi_minlon,roi_maxlon,roi_maxlon,roi_minlon],\
+               [roi_minlat,roi_maxlat,roi_maxlat,roi_minlat,roi_minlat],'k')
+
+plt.savefig('testmap_{:02d}.png'.format(moi),dpi=200,bbox_inches='tight')
+
 #%% GET REGIONAL AVERAGE RAINFALL AND CORRELATE WITH PIXEL-LEVEL SSTS
 ppt_ts = PPTsub.precip.sel(latitude=slice(-23.,-14.),longitude=slice(25.,35.)).mean(axis=(1,2)).values
 pet_ts = PETsub.PET.sel(lats=slice(-23.,-14.),lons=slice(25.,35.)).mean(axis=(0,1)).values
@@ -246,8 +267,8 @@ ax2.legend(loc='best')
 
 fig = plt.figure(figsize = (8,6))
 ax3 = fig.add_axes([0.1,0.1,0.85,0.80])
-tsplot = ax3.plot(years,ppt_norm,alpha=0.5,label='Normalized Precip')
 tsplot = ax3.plot(years,pet_norm,alpha=0.5,label='Normalized PET')
+tsplot = ax3.plot(years,ppt_norm,alpha=0.5,label='Normalized Precip')
 ax3.legend(loc='best')
 
 resids = pet_ts - pet_est
@@ -283,8 +304,8 @@ plt.title('Scatterplot of Precip and PET')
 ax2.legend(loc='best')
 
 ax3 = plt.subplot(223)
-tsplot = ax3.plot(years,ppt_norm,alpha=0.5,label='Normalized Precip')
 tsplot = ax3.plot(years,pet_norm,alpha=0.5,label='Normalized PET')
+tsplot = ax3.plot(years,ppt_norm,alpha=0.5,label='Normalized Precip')
 plt.ylabel('Normalized PPT and PET')
 ax3.legend(loc='best')
 
@@ -298,6 +319,8 @@ plt.title('Timeseries of MAM PET Residuals')
 ax1.legend(loc='best')
 
 fig.tight_layout()
+
+plt.savefig('/home/sandbox-people/husak/PythonScripts/TempDelete.png',dpi=200)
 
 #%%  link to Sea Surface Temperatures (SSTs)
 # file downloaded from https://www.esrl.noaa.gov/psd/data/gridded/data.noaa.oisst.v2.html
@@ -342,6 +365,7 @@ cbar = fig.colorbar(tmpgr, cax=fig.add_axes([0.05,0.04,0.9,0.03]),orientation='h
 cbar.ax.tick_params(labelsize=8)
 plt.tight_layout()
 
+plt.savefig('/home/sandbox-people/husak/PythonScripts/PETresid_SST_corr.png',dpi=200)
 
 
 
