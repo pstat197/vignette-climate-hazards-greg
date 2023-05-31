@@ -21,8 +21,11 @@ count_bord = cartopy.feature.NaturalEarthFeature('cultural','admin_0_boundary_li
 #%% download here and graph it
 data_dir = 'C:/Users/gizra/OneDrive/Documents/netcdf/'
 infile = 'chirps-v2.0.monthly (1).nc'
-# %% 
 chirps = xr.open_dataset(data_dir+infile)
+#%%
+PPT_dir = '/home/chc-data-out/products/CHIRPS-2.0/global_monthly/netcdf/'
+infile = 'chirps-v2.0.monthly.nc'
+chirps = xr.open_dataset(PPT_dir+infile)
 #%% africa?
 #set spatial subset dimensions
 minlat = -40.; maxlat = 40.
@@ -94,7 +97,7 @@ for ax in axes.flat:
     ax.axes.axis("tight")
     ax.set_xlabel("")
 
-axes[0, 0].set_title("Weighted by DPM")
+axes[0, 0].set_title("season = DJF")
 axes[0, 1].set_title("Equal Weighting")
 axes[0, 2].set_title("Difference")
 
