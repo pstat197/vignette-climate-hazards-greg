@@ -372,6 +372,4 @@ plt.savefig('/home/sandbox-people/husak/PythonScripts/PETresid_SST_corr.png',dpi
 
 
 
-
-
  
